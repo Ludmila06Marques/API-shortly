@@ -2,7 +2,7 @@ import joi from "joi"
 
 const userSchema = joi.object({
   name: joi.string().required(),
-  email: joi.email().required(),
+  email: joi.string().required(),
   password: joi.string().required(),
   confirmPassword: joi.string().required()
 })
