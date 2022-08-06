@@ -15,12 +15,11 @@ async function authRoute(req,res , next){
     }
 
   const gaveta = result.rows[0].userId
-  console.log(gaveta)
+
 
   const resultUser= await db.query(`SELECT * FROM users  WHERE id=$1` , [gaveta])
 
    
-   console.log(resultUser)
 
     if(resultUser.rowCount==0) return res.status(401).send("No user found."); // unauthorized
 
