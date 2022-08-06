@@ -2,6 +2,7 @@ import db from "../postgressStrategy/pg.js"
 import {v4 as uuid} from "uuid"
 import bcrypt from 'bcrypt';
 
+
 //users : id , name , email , password 
 
 export async function signUp(req,res){
@@ -55,3 +56,45 @@ console.log(result.rows[0].id)
   
 }
 
+export async function getInfo(req,res){
+    const {resultUser} = res.locals;
+    const [user]= resultUser.rows
+    if(!user) return res.send(404);
+   
+
+
+    const resultInfoUser = await db.query(`
+    SELECT us.id, us.name , SUM(ur."visitCount") as "vistiCount"  
+    FROM users us
+    JOIN urls ur ON ur."userId"=us.id
+    GROUP BY us.id
+    ` , )
+    const [info]= resultInfoUser.rows
+
+    const resultUrls = await db.query(`
+    SELECT * FROM urls WHERE "userId"=$1
+    ` ,[resultUser.rows[0].id])  
+  
+const listaUrl= resultUrls.rows
+listaUrl.map(item => item.userId == resultUser.rows[0].id)
+
+    console.log(listaUrl)
+
+
+
+res.send({...info , listaUrl}).status(200)
+
+}
+
+export async function getRanking(req,res){
+
+    const infoUser= db.query(`
+    SELECT us.id , us.name , COUNT(ur.id) as "linksCount"
+    FROM users us 
+    JOIN urls ur ON ur."userId"=us.id
+    GROUP BY us.id
+    `)
+    console.log(infoUser)
+
+
+}
