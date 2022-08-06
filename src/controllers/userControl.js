@@ -40,20 +40,21 @@ export async function signIn(req,res){
     const user = req.body
 
     const result= await db.query(`SELECT * FROM users  WHERE email=$1` , [user.email])
-console.log(result.rows[0].id)
+    const newPass=bcrypt.compareSync(user.password , result.rows[0].password)
+
     //se existir o usuario e a senha descriptografada for igual a senha passada 
-    if(result.rowCount>0  && bcrypt.compareSync(user.password , result.rows[0].password)){
-        const token= uuid()
-        await db.query(`
-        
-       INSERT INTO sessions ("userId" , token)
-       VALUES($1,$2) `,[result.rows[0].id , token])
-        
-       res.send({token}).status(200)
+    if(result.rowCount==0  &&  (!newPass)){
+        res.sendStatus(401)
     }
    
-    res.sendStatus(401)
   
+    const token= uuid()
+    await db.query(`
+    
+   INSERT INTO sessions ("userId" , token)
+   VALUES($1,$2) `,[result.rows[0].id , token])
+    console.log(token)
+   res.sendStatus(200)
 }
 
 export async function getInfo(req,res){
@@ -88,13 +89,15 @@ res.send({...info , listaUrl}).status(200)
 
 export async function getRanking(req,res){
 
-    const infoUser= db.query(`
-    SELECT us.id , us.name , COUNT(ur.id) as "linksCount"
+    const infoUser=await db.query(`
+    SELECT us.id , us.name , COUNT(ur.id) as "linksCount" , SUM(ur."visitCount") as "visitCount"
     FROM users us 
     JOIN urls ur ON ur."userId"=us.id
     GROUP BY us.id
+    ORDER BY "linksCount" DESC
+    LIMIT 10
     `)
-    console.log(infoUser)
-
+    
+res.send(infoUser.rows)
 
 }
