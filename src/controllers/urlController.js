@@ -53,7 +53,7 @@ export async function openLink(req,res){
           WHERE id = $1`, 
           [result.rows[0].id]);
           console.log(result)
-        //  console.log(Object.values(result.rows[0].url))
+     
     res.redirect(result.rows[0].url)
       
 }
@@ -67,16 +67,11 @@ export async function deleteUrlById(req,res){
     ` ,[resultUser.rows[0].id])
  console.log(result.rows)
    
- //minha url de parametro
+
   const urlExist= await db.query(`
   SELECT * FROM urls WHERE id=$1
   
   ` , [id])
-  console.log(urlExist.rows)
-
-  const itsUser = await db.query(`
-
-  `)
 
   if(urlExist.rowCount==0) return res.sendStatus(404)
 

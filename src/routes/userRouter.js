@@ -1,8 +1,8 @@
 import { Router } from "express"
 import { validateUser , validateLogin } from "../middlewares/validation.js"
-import { getInfo, signIn , signUp } from "../controllers/userControl.js"
+import { getInfo, signIn , signUp } from "../controllers/userController.js"
 import authRoute from "../middlewares/authorization.js"
-import { getRanking } from "../controllers/userControl.js"
+import { getRanking } from "../controllers/userController.js"
 
 const userRouter= Router()
 

@@ -4,13 +4,14 @@ import bcrypt from 'bcrypt';
 
 
 //users : id , name , email , password 
+//sessions : id , userId , token
 
 export async function signUp(req,res){
    const user = req.body
-   console.log(req.body)
+  
 
    try {
-   //verifica se ja tem o usuario cadastrado
+
     const result= await db.query(`SELECT name FROM users  WHERE email=$1` , [user.email])
     
     if(result.rowCount>0){
@@ -19,9 +20,9 @@ export async function signUp(req,res){
     if(user.password!== user.confirmPassword){
         return res.send("As senhas nao coincidem").status(401)
     }
-    //criptografar a senha 
+   
     const passwordCripted = bcrypt.hashSync(user.password , 10);
-    //Caso nao exista  , inserir dados dentro da tabela users
+    
     await db.query(`
             INSERT INTO users (name , email , password) 
             VALUES ($1, $2, $3)
@@ -30,7 +31,7 @@ export async function signUp(req,res){
         res.send("Usuario cadastrado com sucesso").status(200)
    } catch (error) {
     
-    console.log(error)
+  
     res.sendStatus(500)
    }
 
@@ -42,7 +43,7 @@ export async function signIn(req,res){
     const result= await db.query(`SELECT * FROM users  WHERE email=$1` , [user.email])
     const newPass=bcrypt.compareSync(user.password , result.rows[0].password)
 
-    //se existir o usuario e a senha descriptografada for igual a senha passada 
+   
     if(result.rowCount==0  &&  (!newPass)){
         res.sendStatus(401)
     }
@@ -53,7 +54,7 @@ export async function signIn(req,res){
     
    INSERT INTO sessions ("userId" , token)
    VALUES($1,$2) `,[result.rows[0].id , token])
-    console.log(token)
+  
    res.sendStatus(200)
 }
 
@@ -78,10 +79,6 @@ export async function getInfo(req,res){
   
 const listaUrl= resultUrls.rows
 listaUrl.map(item => item.userId == resultUser.rows[0].id)
-
-    console.log(listaUrl)
-
-
 
 res.send({...info , listaUrl}).status(200)
 
