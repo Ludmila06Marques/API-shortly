@@ -1,5 +1,6 @@
 import db from "../postgressStrategy/pg.js"
 import { nanoid } from "nanoid";
+import dayjs from "dayjs";
 
 
 
@@ -13,12 +14,13 @@ export async function shortLink(req,res){
     const NUM_OF_CHARS = 10;
     const shortURL = nanoid(NUM_OF_CHARS);
     const visit="0"
-    console.log(shortURL)
+ 
+    const now=dayjs()
 
     await db.query(`
-    INSERT INTO urls ("userId","shortUrl",url,"visitCount") 
-    VALUES ($1, $2, $3 , $4)
-`, [resultUser.rows[0].id, shortURL, url, visit ])
+    INSERT INTO urls ("userId","shortUrl",url,"visitCount","createdAt") 
+    VALUES ($1, $2, $3 , $4,$5)
+`, [resultUser.rows[0].id, shortURL, url, visit ,now])
 
 
 

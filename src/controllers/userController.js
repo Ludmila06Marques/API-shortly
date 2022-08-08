@@ -1,7 +1,7 @@
 import db from "../postgressStrategy/pg.js"
 import {v4 as uuid} from "uuid"
 import bcrypt from 'bcrypt';
-
+import dayjs from "dayjs";
 
 //users : id , name , email , password 
 //sessions : id , userId , token
@@ -11,6 +11,7 @@ export async function signUp(req,res){
   
 
    try {
+
 
     const result= await db.query(`SELECT name FROM users  WHERE email=$1` , [user.email])
 
@@ -24,11 +25,13 @@ export async function signUp(req,res){
     }
    
     const passwordCripted = bcrypt.hashSync(user.password , 10);
+    var now = dayjs()
+   
     
     await db.query(`
-            INSERT INTO users (name , email , password) 
-            VALUES ($1, $2, $3)
-        `, [user.name, user.email, passwordCripted])
+            INSERT INTO users (name , email , password , "createdAt") 
+            VALUES ($1, $2, $3 , $4)
+        `, [user.name, user.email, passwordCripted, now])
 
         res.send("Usuario cadastrado com sucesso").status(200)
    } catch (error) {
@@ -54,10 +57,12 @@ export async function signIn(req,res){
    
   
     const token= uuid()
+    const now=dayjs()
+
     await db.query(`
     
-   INSERT INTO sessions ("userId" , token)
-   VALUES($1,$2) `,[result.rows[0].id , token])
+   INSERT INTO sessions ("userId" , token , "createdAt")
+   VALUES($1,$2,$3) `,[result.rows[0].id , token, now])
   
    res.sendStatus(200)
 }
