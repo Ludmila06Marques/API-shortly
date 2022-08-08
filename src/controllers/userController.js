@@ -13,6 +13,8 @@ export async function signUp(req,res){
    try {
 
     const result= await db.query(`SELECT name FROM users  WHERE email=$1` , [user.email])
+
+ 
     
     if(result.rowCount>0){
         return res.send("Usuario ja cadastrado, entre").status(509)
@@ -41,12 +43,14 @@ export async function signIn(req,res){
     const user = req.body
 
     const result= await db.query(`SELECT * FROM users  WHERE email=$1` , [user.email])
+    console.log(result)
+    if(result.rowCount==0) return res.sendStatus(401)
+
     const newPass=bcrypt.compareSync(user.password , result.rows[0].password)
 
+    if(!newPass) return res.sendStatus(401)
    
-    if(result.rowCount==0  &&  (!newPass)){
-        res.sendStatus(401)
-    }
+
    
   
     const token= uuid()
@@ -71,16 +75,23 @@ export async function getInfo(req,res){
     JOIN urls ur ON ur."userId"=us.id
     GROUP BY us.id
     ` , )
-    const [info]= resultInfoUser.rows
 
+    const [info]= resultInfoUser.rows
+  
     const resultUrls = await db.query(`
     SELECT * FROM urls WHERE "userId"=$1
     ` ,[resultUser.rows[0].id])  
+    console.log(resultUser.rows[0].id)
   
-const listaUrl= resultUrls.rows
-listaUrl.map(item => item.userId == resultUser.rows[0].id)
+    const todas = await db.query(`
+    SELECT * FROM urls 
+    ` )  
+    console.log(todas)
+const shortenedUrls= resultUrls.rows
+console.log(shortenedUrls)
+shortenedUrls.map(item => item.userId == resultUser.rows[0].id)
 
-res.send({...info , listaUrl}).status(200)
+res.send({...info , shortenedUrls}).status(200)
 
 }
 

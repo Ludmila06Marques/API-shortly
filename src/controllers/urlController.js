@@ -8,7 +8,7 @@ import { nanoid } from "nanoid";
 export async function shortLink(req,res){
     const {resultUser} = res.locals;
     const {url}= req.body
-    console.log(url)
+   
   
     const NUM_OF_CHARS = 10;
     const shortURL = nanoid(NUM_OF_CHARS);
@@ -19,6 +19,8 @@ export async function shortLink(req,res){
     INSERT INTO urls ("userId","shortUrl",url,"visitCount") 
     VALUES ($1, $2, $3 , $4)
 `, [resultUser.rows[0].id, shortURL, url, visit ])
+
+
 
 res.send({shortURL}).status(200)
 
@@ -31,6 +33,7 @@ export async function getLinkById(req,res){
     if(result.rowCount==0) return res.sendStatus(404)
 
     const [link]= result.rows
+    console.log(link)
 
     delete link.userId;
     delete link.visitCount;
